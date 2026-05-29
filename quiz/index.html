@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Final - Final Quiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar no-print" id="sidebar">
+            <div class="brand">
+                <h1>Platform Final</h1>
+                <p>Unified Learning Dashboard</p>
+            </div>
+
+            <!-- Tab Navigation -->
+            <nav aria-label="Module navigation" class="nav-links">
+                <a href="../index.html" class="nav-link">🏠 Overview</a>
+                <a href="../exercises/index.html" class="nav-link ">📚 Exercises</a>
+                <a href="../questions_bank/index.html" class="nav-link ">🏦 Questions Bank</a>
+                <a href="../exams/index.html" class="nav-link ">📝 Exams</a>
+                <a href="../quiz/index.html" class="nav-link active">🎓 Final Quiz</a>
+            </nav>
+
+            <!-- Global Actions -->
+            <div class="global-actions" style="margin-top: 1rem;">
+                <button class="nav-link" onclick="toggleFocusMode()" style="background:none;border:none;text-align:left;width:100%;font:inherit;cursor:pointer;">🎯 Toggle Focus Mode</button>
+                <button class="nav-link" onclick="enterFlashcardMode()" style="background:none;border:none;text-align:left;width:100%;font:inherit;cursor:pointer;">🎴 Flashcard Mode</button>
+                <button class="nav-link" onclick="printQuestionsOnly()" style="background:none;border:none;text-align:left;width:100%;font:inherit;cursor:pointer;">🖨️ Print / PDF</button>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-header">
+                    <span>Progress</span>
+                    <span id="progress-text">0 / 0</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+            <div id="session-counter" class="session-counter" style="margin: 1rem 1.5rem; font-size: 0.9rem;">
+                🌟 Session: <strong id="session-count" style="color: var(--accent);">0</strong> completed
+            </div>
+
+            <!-- Dynamic Filters Container (Injected by JS) -->
+            <div id="sidebar-filters-container"></div>
+
+            <div class="sidebar-actions" style="margin-top: auto;">
+                <button class="btn btn-outline" onclick="exportProgress()" style="width: 100%; margin-bottom: 0.5rem;">⇣ Export Progress</button>
+                <label class="btn btn-outline import-label" style="display: block; text-align: center;">
+                    ⇡ Import Progress
+                    <input type="file" accept=".json" style="display:none" onchange="importProgress(this)">
+                </label>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header no-print">
+                <h2 id="page-title">Final Quiz</h2>
+                <div class="search-bar search-bar-spacer">
+                    <span>🔍</span>
+                    <input type="text" id="global-search" placeholder="Search..." oninput="handleSearch(this)" aria-label="Search questions">
+                </div>
+                <div class="stats" id="results-stats" aria-live="polite">Loading...</div>
+            </div>
+            
+            <!-- Incomplete Filter and Show All Toggle -->
+            <div class="content-actions no-print" style="margin-bottom: 1rem; display: flex; gap: 1rem;">
+                <button class="btn btn-outline" id="toggle-all-answers" onclick="toggleAllAnswers()">👁️ Show All Answers</button>
+                <button class="btn btn-outline" id="incomplete-filter-btn" onclick="toggleIncompleteFilter()">🔲 Show Incomplete Only</button>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-container active ">
+                <div id="quiz-content"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Sidebar Toggle -->
+    <button class="sidebar-toggle no-print" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Toggle sidebar menu">☰</button>
+
+    <!-- Scripts -->
+    <script src="data.js"></script>
+    <script src="../shared/core.js"></script>
+    <script src="logic.js"></script>
+</body>
+</html>
