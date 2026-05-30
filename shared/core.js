@@ -415,17 +415,52 @@ window.generateCardHtml = function(item) {
         var optionsHtml = '';
         if (item.type === 'mcq' && item.options) {
             var ansStr = typeof item.answer === 'string' ? item.answer : '';
-            var correctLetter = (ansStr.match(/Option\s+([A-D])/i) || ansStr.match(/^([A-D])\s*-/) || [])[1] || '';
+            // Strip markdown bold and HTML tags for cleaner matching
+            var cleanAns = ansStr.replace(/\*\*/g, '').replace(/<[^>]*>/g, '').trim();
+            var correctLetter = '';
+            // Try multiple patterns to extract the correct answer letter:
+            // 1. "Option B" or "Option B -..."
+            var m = cleanAns.match(/Option\s+([A-D])/i);
+            if (!m) {
+                // 2. "Answer: A" or "Answer: A -..."
+                m = cleanAns.match(/Answer:\s*([A-D])\b/i);
+            }
+            if (!m) {
+                // 3. "A) text..." or "A) text" (letter-paren at start)
+                m = cleanAns.match(/^([A-D])\)\s*/i);
+            }
+            if (!m) {
+                // 4. "A - text" or "A -text" (letter-dash at start)
+                m = cleanAns.match(/^([A-D])\s*[-–—]\s*/i);
+            }
+            if (!m) {
+                // 5. Just a single letter "A" or "B"
+                m = cleanAns.match(/^([A-D])$/i);
+            }
+            if (m) correctLetter = m[1].toUpperCase();
             
             optionsHtml = '<ul class="mcq-options" data-answer="' + correctLetter + '" role="listbox">' +
                 item.options.map(function(opt) {
-                    var letter = (String(opt).match(/^([A-D])\)/) || [])[1] || '';
+                    var optStr = String(opt).replace(/<[^>]*>/g, '').trim();
+                    var letter = (optStr.match(/^([A-D])\)/) || [])[1] || '';
                     return '<li class="mcq-option" data-letter="' + letter + '" data-correct="' + (letter === correctLetter) + '" onclick="checkMcqAnswer(this)" onkeydown="handleMcqKeydown(event, this)" tabindex="0" role="option">' + opt + '</li>';
                 }).join('') +
             '</ul>';
         } else if (item.type === 'tf') {
             var ansStr = typeof item.answer === 'string' ? item.answer : '';
-            var correctTf = ansStr.trim().toLowerCase().startsWith('true') ? 'True' : 'False';
+            // Strip markdown bold and HTML tags for cleaner matching
+            var cleanAns = ansStr.replace(/\*\*/g, '').replace(/<[^>]*>/g, '').trim().toLowerCase();
+            var correctTf = 'True'; // default
+            if (cleanAns.startsWith('true') || cleanAns.startsWith('(v)') || cleanAns.match(/answer:\s*v\b/i) || cleanAns === 'v') {
+                correctTf = 'True';
+            } else if (cleanAns.startsWith('false') || cleanAns.startsWith('(x)') || cleanAns.match(/answer:\s*x\b/i) || cleanAns === 'x') {
+                correctTf = 'False';
+            } else {
+                // Fallback: search anywhere in the string
+                if (/\b(false|incorrect)\b/i.test(cleanAns) || /\(x\)/i.test(cleanAns)) {
+                    correctTf = 'False';
+                }
+            }
             optionsHtml = '<div class="tf-buttons" data-answer="' + correctTf + '" role="group" aria-label="True or False">' +
                 '<button class="tf-btn" data-value="True" onclick="checkTfAnswer(this)">✓ True</button>' +
                 '<button class="tf-btn" data-value="False" onclick="checkTfAnswer(this)">✗ False</button>' +
